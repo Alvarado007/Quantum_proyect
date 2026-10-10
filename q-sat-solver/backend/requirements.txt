@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+qiskit
+pydantic
+qiskit-aer
+qiskit-ionq
+sympy
