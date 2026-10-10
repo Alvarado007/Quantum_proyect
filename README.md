@@ -1,41 +1,68 @@
-# Proyecto: Quantum Logic Evaluator (Q-SAT Solver)
+# 🚀 Q-SAT Solver: Quantum Boolean Satisfiability
 
-## Descripción y Enfoque Cuántico
-Este proyecto es una herramienta de línea de comandos (CLI) escrita en Python que evalúa expresiones lógicas booleanas (ej. `(P | Q) >> R`) usando algoritmos de computación cuántica, específicamente el algoritmo de Grover.
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Qiskit](https://img.shields.io/badge/Qiskit-Quantum-blue)
+![React](https://img.shields.io/badge/React-Accessible_UI-61DAFB)
 
-### El Problema Clásico vs. La Solución Cuántica
-El problema de satisfacibilidad booleana (SAT) implica encontrar si existe una asignación de variables lógicas que hace que la expresión evalúe a Verdadero. 
-- **Enfoque Clásico:** En el peor caso, evaluar todas las combinaciones posibles de $N$ variables es una operación de complejidad $O(2^N)$, lo cual escala exponencialmente y se vuelve intratable muy rápido.
-- **Enfoque Cuántico (Grover):** A través del paralelismo cuántico, el sistema entra en una superposición de todos los $2^N$ estados simultáneamente. El algoritmo de Grover permite amplificar la amplitud (probabilidad) de las soluciones correctas, encontrándolas en $O(\sqrt{2^N})$ operaciones. Esto provee una aceleración cuadrática (quadratic speedup) respecto al enfoque clásico.
+**Q-SAT Solver** is a full-stack quantum computing application built for the Qollab Hackathon. It evaluates Boolean logic expressions (e.g., `(P | Q) >> R`) and finds satisfying assignments using **Quantum Parallelism** and **Grover's Algorithm**, offering a significant speedup over classical truth tables.
 
-## Arquitectura del Sistema
-El proyecto se divide en tres módulos principales para mantener un bajo acoplamiento:
-1. **Parser (`parser/logic_parser.py`):** Utiliza `sympy` para parsear el string de entrada del usuario, identificar las variables únicas y normalizar la expresión lógica a un formato procesable por el circuito cuántico (por ejemplo, manejando simplificaciones lógicas).
-2. **Quantum Core (`quantum_core/`):**
-   - `oracle_builder.py`: Traduce el árbol sintáctico del parser a un circuito cuántico usando `qiskit`, aplicando compuertas fundamentales como X, y Toffoli (MCX), con apoyo de un qubit auxiliar para el phase kickback.
-   - `grover.py`: Ensambla el flujo general. Inicializa los qubits en superposición total usando compuertas de Hadamard ($H$), añade el oráculo lógico y aplica el operador de difusión de Grover.
-   - `executor.py`: Gestiona la simulación del circuito utilizando `AerSimulator` de Qiskit, obteniendo las mediciones de las probabilidades de los estados cuánticos.
-3. **Utils (`utils/display.py`):** Recibe las cuentas resultantes de la ejecución cuántica, descifra los estados binarios asociándolos a sus respectivas variables lógicas usando `rich` para mostrar en la terminal aquellas combinaciones que sean verdaderas.
+---
 
-## Instalación
+## 👥 The Team
+This project was developed collaboratively by:
+*   **Samuel Alvarado Acevedo**
+*   **Samuel Agudelo Sosa**
+*   **Sebastian Saenz Mejia**
+*   **Paula Gimena Bohorques**
 
-Se requiere Python 3.10 o superior. 
+---
 
-1. Clona el repositorio e ingresa a la carpeta.
-2. Es recomendable crear un entorno virtual:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # En Windows: venv\Scripts\activate
-   ```
-3. Instala las dependencias:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## 📖 What it does
+The Q-SAT Solver allows users to input any Boolean logic expression through an accessible, highly-visual web interface. Instead of computing the result classically, the backend translates the expression into a quantum circuit (Quantum Oracle), applies Grover's diffusion operator, and runs the circuit on **Qollab's free simulators (or IonQ)**. 
 
-## Uso
-Ejecuta `main.py` pasando la expresión lógica como argumento:
+The results are then decoded and displayed in a user-friendly **Results Dashboard**, highlighting the exact variable combinations that make the expression evaluate to `True`.
+
+---
+
+## ⚠️ The Problem
+In classical computing, finding the satisfying assignment of a Boolean formula (the SAT problem) requires evaluating a truth table. For $N$ variables, there are $2^N$ possible combinations. This exponential growth $O(2^N)$ means that as the formula gets larger, classical computers take an impractical amount of time to find a solution.
+
+## ⚛️ The Quantum Solution
+By leveraging Quantum Computing, we can prepare a superposition of all $2^N$ possible states at once. We then use a **Quantum Oracle** to flip the phase of the states that satisfy the expression, and apply **Grover's Algorithm** to amplify the probability of measuring these correct states. This provides a quadratic speedup $O(\sqrt{2^N})$ compared to classical brute-force methods.
+
+---
+
+## 🏗️ Architecture & Features
+
+This project is decoupled into a high-performance quantum backend and an accessible frontend:
+
+*   **Backend (Python, FastAPI, Qiskit):** Parses the string expression, dynamically builds the reversible quantum circuit, and executes it. Configured to easily switch between local `AerSimulator` for dev and Qollab/IonQ simulators for production.
+*   **Frontend (React, TypeScript, Tailwind CSS):** Strictly adheres to UI/UX accessibility best practices (WCAG contrast, ARIA labels).
+*   **Results Dashboard:**
+    *   **Highlight Cards:** Instantly displays the top winning variable combinations.
+    *   **Smart Histogram:** Color-coded visualization distinguishing probable solutions from quantum noise.
+    *   **Assignment Table:** A detailed, sortable data table mapping binary results to variable names.
+
+---
+
+## 🚀 How to Run It
+
+### 1. Backend Setup
+Navigate to the backend directory and set up the Python environment:
 ```bash
-python main.py "(P | Q) >> R"
+cd q-sat-solver/backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload
 ```
 
-El solver imprimirá en consola las variables lógicas encontradas y las combinaciones que hacen que la expresión sea verdadera, junto con sus probabilidades cuánticas.
+### 2. Frontend Setup
+Open a new terminal, navigate to the frontend directory, and start the development server:
+```bash
+cd q-sat-solver/frontend
+npm install
+npm run dev
+```
+
+Then, open your browser and navigate to the local URL (usually `http://localhost:5173`) to use the Q-SAT Solver.
