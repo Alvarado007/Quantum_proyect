@@ -1,6 +1,7 @@
 import math
 import re
 import sympy
+import time
 from sympy.logic.boolalg import to_dnf, simplify_logic
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
 from qiskit.circuit.library import BitFlipOracleGate
@@ -81,6 +82,7 @@ class QSATSolver:
         """
         Parses the expression, builds the Grover circuit, executes it, and returns the results.
         """
+        start_time = time.time()
         self.parse_expression(expr)
         
         if self.num_vars == 0:
@@ -115,16 +117,29 @@ class QSATSolver:
         result = job.result()
         counts = result.get_counts()
         
-        # Format the results mapping bits to variable assignments
-        formatted_counts = {}
+        # Calculate probabilities and format results
+        # Threshold for probable solution: significantly above uniform distribution
+        uniform_prob = 1.0 / (2 ** self.num_vars)
+        threshold = uniform_prob * 1.2
+        
+        formatted_results = []
         for bitstring, count in counts.items():
-            # bitstring is from right to left (c_n-1 ... c_0)
-            # reversing to match variables[0] ... variables[n-1]
             reversed_bits = bitstring[::-1]
-            formatted_counts[reversed_bits] = count
+            prob = count / shots
+            formatted_results.append({
+                "state": reversed_bits,
+                "probability": round(prob, 4),
+                "is_probable_solution": prob > threshold
+            })
+            
+        # Sort results descending by probability
+        formatted_results.sort(key=lambda x: x["probability"], reverse=True)
+        
+        execution_time_ms = int((time.time() - start_time) * 1000)
             
         return {
+            "expression": expr,
             "variables": [v.name for v in self.variables],
-            "counts": formatted_counts,
-            "total_shots": shots
+            "results": formatted_results,
+            "execution_time_ms": execution_time_ms
         }

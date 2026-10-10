@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import InfoPanel from './components/InfoPanel';
 import ExpressionInput from './components/ExpressionInput';
-import ResultsHistogram from './components/ResultsHistogram';
+import ResultsDashboard from './components/ResultsDashboard';
 import { Layers } from 'lucide-react';
+import { ResultData } from './types';
 
 function App() {
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState<ResultData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSolve = async (expression: string) => {
     setIsLoading(true);
     setError(null);
+    setResults(null);
     
     try {
       const response = await fetch('http://localhost:8000/api/solve', {
@@ -39,7 +41,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-200">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <header className="mb-10 text-center">
           <div className="flex justify-center items-center gap-3 mb-4">
             <div className="p-3 bg-blue-600 rounded-lg shadow-lg">
@@ -68,15 +70,7 @@ function App() {
             </div>
           )}
 
-          {isLoading && !results && !error && (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400 animate-pulse">
-              <p>Initializing quantum circuit and applying Grover's algorithm...</p>
-            </div>
-          )}
-
-          {results && !isLoading && (
-            <ResultsHistogram data={results} />
-          )}
+          <ResultsDashboard data={results} isLoading={isLoading} error={error} />
         </main>
       </div>
     </div>
